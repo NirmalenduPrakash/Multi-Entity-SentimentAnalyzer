@@ -23,7 +23,7 @@ Steps
 ```
 How it works
 ```
-![Screen Shot 2020-03-13 at 10 58 33 AM](https://user-images.githubusercontent.com/19767662/76585576-ab416980-6519-11ea-89fb-5e1e0228215b.png)
+![Screen Shot 2020-03-13 at 11 13 22 AM](https://user-images.githubusercontent.com/19767662/76586428-c1e8c000-651b-11ea-8202-edd005ea5974.png)
 * It is a lexicon based method which uses unigrams, bigrams and polarity reverser lists from 
 IBM Debator
 * The example document "005.txt" is a political article about UK pre election budget controversy.
