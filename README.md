@@ -1,5 +1,6 @@
-# MultiEntity Sentiment Analysis NLP
+# MultiEntity Sentiment Analysis NLP (Lexicon Based and Deep NN based)
 
+## Lexicon Based
 ```
 Prerequistes
 ```
@@ -37,7 +38,35 @@ Future Enhancements
 * Sometimes the analyzer produces noise such as "Mr Brown"-->"rise" = positive(0.344). This does not use the complete object token. It could be either discarded, or could be retained based on a configurable temperature parameter.
 * A better subject-object model could be trained, but this would require a huge labelled dataset.
 
+## BERT Based
+```
+Prerequistes
+```
+* torch
+* transformers
+* pickle
+* nltk
+* glob2
+* bs4
+
+```
+Steps
+```
+* Follow the steps in subject-object_MPQA.ipynb for your own data preparation
+This prepares a tagged sequence for subject-object identification in a sentence.
+It follows BIO format
+* Follow steps in Subject-Object-BERT-SEQ.ipynb to train your own model
+the encoder is BERT layer followed by a GRU decoder
+* Model to be released soon [training underway]
+* If above model is successful, a classifier model to predict polarity-one of the following classes from the corpus-
+positive, negative, both, neutral,uncertain-positive, uncertain-negative, uncertain-both,
+                uncertain-neutral
+```
+Limitations
+
+The MPQA corpus has only 70 documents with around 10 sentences each. This may not be enough, even with a pretrained model.
+```
 
 ## Any questions 👨‍💻
 <p> If you have any questions, feel free to ask me: </p>
-<p> 📧: "nirmalendu@outlook.com"></p>
+<p> 📧: "nirmalendu@outlook.com"</p>
