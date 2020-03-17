@@ -1,0 +1,19 @@
+#! /bin/bash
+#PBS -P yolov3
+#PBS -j oe
+#PBS -N ner
+#PBS -q volta_login
+#PBS -l select=1:ncpus=10:mem=50gb:ngpus=1
+#PBS -l walltime=04:00:00
+
+cd $PBS_O_WORKDIR;
+np=$(cat ${PBS_NODEFILE} | wc -l);
+
+image="/app1/common/singularity-img/3.0.0/pytorch_1.4_cuda10.0-cudnn7-devel-ubuntu18.04-py36.simg"
+
+singularity exec $image bash << EOF > stdout.$PBS_JOBID 2> stderr.$PBS_JOBID
+PYTHONPATH=$PYTHONPATH:/home/svu/e0401988/volta_pypkg/lib/python3.6/site-packages
+export PYTHONPATH
+python /home/svu/e0401988/NLP/BeamSearch/subject_object_bert_seq_Beam_Search.py
+
+EOF
