@@ -174,7 +174,7 @@ for _e in range(200):
         step_losses=[torch.tensor(0)]
         decoder_inputs=[]
         decoder_inputs.append(decoder_input)
-        for di in range(5):
+        for di in range(labels.shape[1]):
           loss=[]
           decoder_outputs=[]
           for indx,input in enumerate(decoder_inputs):
@@ -194,43 +194,53 @@ for _e in range(200):
         loss.backward()   
         # enc_optimizer.step()
         dec_optimizer.step()
-    # train_loss=train_loss/len(train)
+    train_loss=train_loss/len(train)
     # print(train_loss)
     # print(train_loss)    
     val_loss=0
     for t, (seq, attn_mask, labels) in enumerate(val_loader):
+        batch_size=seq.shape[0]
         seq=seq.to(device)
         attn_mask=attn_mask.to(device)
         labels =labels.to(device) #torch.tensor(data_batch).to(device)
-        batch_size=seq.shape[0]
+                
         # enc_optimizer.zero_grad()
         dec_optimizer.zero_grad()
-        encoder_output=encoder(seq,attn_mask)
+        encoder_output=encoder(seq,attn_mask)        
         decoder_input = torch.tensor([batch_size*[tag_index['<s>']]], device=device).view(-1,1)
         decoder_hidden=encoder_output.view(batch_size,1,-1)
         labels= torch.cat((labels,torch.tensor(batch_size*[tag_index['</s>']], device=device).view(-1,1)),dim=1)
+        # loss=0
+        # for di in range(labels.shape[1]):
+        #   decoder_output,decoder_hidden=decoder(decoder_hidden,decoder_input)
+        #   loss += criterion(decoder_output.view(encoder_output.shape[0],-1), labels[:,di])
+        #   train_loss+=loss.data.item()
+        #   decoder_input = labels[:,di]
+
         step_losses=[torch.tensor(0)]
         decoder_inputs=[]
         decoder_inputs.append(decoder_input)
         for di in range(labels.shape[1]):
-          input_loss=[]
+          loss=[]
           decoder_outputs=[]
           for indx,input in enumerate(decoder_inputs):
-            decoder_output,decoder_hidden=decoder(decoder_hidden,input)
-            # input_loss[-1] += criterion(decoder_output.view(encoder_output.shape[0],-1), labels[:,di])
-            _, top_idx = decoder_output.data.topk(3)
-            decoder_outputs.append([top_idx.view(encoder_output.shape[0],-1)])
-            for i in range(top_idx.shape[1]):
-              input_loss.append(torch.clone(step_losses[indx]))
-              
-              input_loss[-1] += criterion(top_idx[:,i], labels[:,di])
-          step_losses=deepcopy(input_loss)    
-          decoder_inputs=deepcopy(decoder_outputs)
-          val_loss+=torch.min(torch.cat(step_losses)).data.item()
+            for k in range(input.shape[1]):
+              # print(decoder_hidden.shape,input[:,k].shape)
+              decoder_output,decoder_hidden=decoder(decoder_hidden,input[:,k])
+              # input_loss[-1] += criterion(decoder_output.view(encoder_output.shape[0],-1), labels[:,di])
+              _, top_idx = decoder_output.data.topk(2)
+              decoder_outputs.append(top_idx.view(encoder_output.shape[0],-1))
+              # print(decoder_output.shape,labels[:,di].shape)
+              loss.append(criterion(decoder_output.view(encoder_output.shape[0],-1),labels[:,di]))            
+          step_losses=loss
+          decoder_inputs=decoder_outputs
+        arg=np.argmin([t.data.item() for t in step_losses])  
+        loss=step_losses[arg]
+        val_loss+=loss.data.item()
     val_loss=val_loss/len(val)
     if(len(val_losses)>0 and val_loss<min(val_losses)):
-      torch.save(encoder.state_dict(), '/content/drive/My Drive/BERT-SEQ-Tagger/encoder.pt') 
-      torch.save(decoder.state_dict(), '/content/drive/My Drive/BERT-SEQ-Tagger/decoder.pt')  
+      torch.save(encoder.state_dict(), '/home/svu/e0401988/NLP/BeamSearch/encoder.pt') 
+      torch.save(decoder.state_dict(), '/home/svu/e0401988/NLP/BeamSearch/decoder.pt')  
     val_losses.append(val_loss)      
     print('training loss:{} validation loss:{}'.format(train_loss,val_loss))
 
